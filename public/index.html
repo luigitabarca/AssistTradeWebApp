@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="http://localhost:4001/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <h1>Assist Trading App V1</h1>
+
+    <div id='container'>
+        <table id="rankings-table" class="table table-striped">
+			<tr class="bg-info">
+				<th>Symbol</th>
+				<th>PriceBithumb</th>
+                <th>VolumeBithumb</th>
+                <th onclick="sortColumn('priceBinance')">PriceBinance</th>
+				<th>VolumeBinance</th>
+				<th>PriceCoinbit</th>
+				<th>VolumeCoinbit</th>
+				<th>PriceUpbit</th>	
+				<th>VolumeUpbit</th>		
+			</tr>	
+		
+			 <tbody id='table-body' class="table">
+				
+			</tbody>
+		</table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+<style>
+    th{ 
+        color:#fff;
+            }
+</style>
