@@ -64,3 +64,24 @@ socket.on('tabel-data', (data) => {
     }
 })
 
+window.onload = () => {
+    const getCellValue = (tr, idx) => {
+        return tr.children[idx].children[1].innerText || tr.children[idx].children[1].textContent;
+    }
+
+    const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+        v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+        )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+    // do the work...
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+        const table = th.closest('table');
+        const arrayToSort = Array.from(table.querySelectorAll('tr:nth-child(n+1)'));
+        arrayToSort.shift();
+        console.log(arrayToSort);
+        arrayToSort
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => table.appendChild(tr) );
+    })));
+}
+
