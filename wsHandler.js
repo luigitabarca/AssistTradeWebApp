@@ -20,15 +20,17 @@ class WsHanlder {
     }
 
     handleWsConnection() {
-        this.io.on("connection", (socket) => {
+        this.io.on("connection", async (socket) => {
             console.log('Incoming connection...');
+            console.log('Fetching data...');
+
+            const processedData = await this.fetchProcessedData();
+            
+            socket.emit('first-data', processedData);
 
             cron.schedule('*/5 * * * * *', async () => {
 
-                const { binanceData, coinbitData, bithumbData, upbitData } = await this.collectData();  
-
-                const processedData = this.processData(binanceData, coinbitData, bithumbData, upbitData);
-
+                const processedData = await this.fetchProcessedData()
                 socket.emit('tabel-data', processedData);
 
               });
@@ -54,6 +56,14 @@ class WsHanlder {
         const unifiedData = this.dataParser.unifyParsedData(parsedBithumbData, parsedBinanceData, parsedCoibitData, parsedUpbitData); 
 
         return unifiedData;
+    }
+
+    async fetchProcessedData() {
+
+        const { binanceData, coinbitData, bithumbData, upbitData } = await this.collectData();  
+        const processedData = this.processData(binanceData, coinbitData, bithumbData, upbitData);
+
+        return processedData
     }
         
 }
