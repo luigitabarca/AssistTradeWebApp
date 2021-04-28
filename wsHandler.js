@@ -1,69 +1,65 @@
 const socket = require('socket.io');
-const DataCollector = require('./dataCollector');
-const DataParser = require('./dataParser');
 const fs = require('fs');
 const cron = require('node-cron');
+
+const DataProvider = require('./dataProvider');
 
 class WsHanlder {
 
     io;
-    dataCollector;
-    dataParser;
+    dataProvider;
+    collectingData;
+    currencyData;
 
     constructor(serverPort, wsPort) {
+        // open websocket port
         this.io = require("socket.io")(wsPort, {
             cors: {
                 origin: `http://localhost:${serverPort}`,
                 credentials: true
               }
         });
+
+        // set local params
+        this.collectingData = false;
+        this.dataProvider = new DataProvider();
     }
 
     handleWsConnection() {
         this.io.on("connection", async (socket) => {
             console.log('Incoming connection...');
-            console.log('Fetching data...');
 
-            const processedData = await this.fetchProcessedData();
-            
-            socket.emit('first-data', processedData);
+            if (!this.collectingData) {
+                console.log('Start collecting data...');
+
+                // collect data for the first client who connects to the server so we can create him the table asap.
+                this.currencyData = await this.dataProvider.fetchProcessedData();
+
+                // start collecting data periodically for live updates to clients
+                this.startCollectingData();
+            } else {
+                console.log('Collecting process already running!');
+            }
+
+            socket.emit('first-data', this.currencyData);
 
             cron.schedule('*/5 * * * * *', async () => {
 
-                const processedData = await this.fetchProcessedData()
-                socket.emit('tabel-data', processedData);
+                socket.emit('tabel-data', this.currencyData);
 
-              });
+            });
 
         });
     }
 
-    async collectData() {
-        this.dataCollector = new DataCollector();
-        return this.dataCollector.getData();
-    }
+    startCollectingData() {
+        this.collectingData = true;
 
-    processData(binanceData, coinbitData, bithumbData, upbitData) { 
-        this.dataParser = new DataParser();
+        cron.schedule('*/5 * * * * *', async () => {
 
-        const parsedBithumbData = this.dataParser.parseBithumpbData(bithumbData);
-        const symbols = parsedBithumbData.map(bithumpdata => bithumpdata.symbol);
+            this.currencyData = await this.dataProvider.fetchProcessedData();
 
-        const parsedBinanceData = this.dataParser.parseBinanceData(binanceData, symbols);
-        const parsedCoibitData = this.dataParser.parseCoinbitData(coinbitData, symbols);
-        const parsedUpbitData = this.dataParser.parseUpbitData(upbitData, symbols);
-
-        const unifiedData = this.dataParser.unifyParsedData(parsedBithumbData, parsedBinanceData, parsedCoibitData, parsedUpbitData); 
-
-        return unifiedData;
-    }
-
-    async fetchProcessedData() {
-
-        const { binanceData, coinbitData, bithumbData, upbitData } = await this.collectData();  
-        const processedData = this.processData(binanceData, coinbitData, bithumbData, upbitData);
-
-        return processedData
+        }); 
     }
         
 }
