@@ -125,7 +125,7 @@ class DataParser {
                 priceBithumb: (parseFloat(ticker.price) * 0.0009).toFixed(4),
                 volumeBihumb: parseInt(parseFloat(ticker.volume) * 0.0009),
                 priceBinance: parsedBinanceData[ticker.symbol] ? (parseFloat(parsedBinanceData[ticker.symbol].price)*priceBTC).toFixed(4) : 0,
-                volumeBinance: parsedBinanceData[ticker.symbol] ? (parseInt(parsedBinanceData[ticker.symbol].volume)*priceBTC) : 0,
+                volumeBinance: parsedBinanceData[ticker.symbol] ? parseInt(parseInt(parsedBinanceData[ticker.symbol].volume)*priceBTC) : 0,
                 priceCoinbit: parsedCoinbitData[ticker.symbol] ? (parseFloat(parsedCoinbitData[ticker.symbol].price) * 0.0009 ).toFixed(4): 0,
                 volumeCoinbit: parsedCoinbitData[ticker.symbol] ? parseInt(parseFloat(parsedCoinbitData[ticker.symbol].volume) * 0.0009) : 0,
                 priceUpbit: parsedUpbitData[ticker.symbol] ? (parsedUpbitData[ticker.symbol].price * 0.0009).toFixed(4) : 0,
