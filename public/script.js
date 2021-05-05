@@ -1,6 +1,10 @@
 const socket = io.connect("http://localhost:4001");
 
 const rankingBody= document.querySelector("#table-body");
+var priceBTC =1;
+
+socket.emit("hello", "USDT");
+
 
 socket.on('first-data', (data) => {
     rankingBody.innerHTML = '';

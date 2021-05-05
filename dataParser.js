@@ -18,16 +18,22 @@ class DataParser {
         return parsedData;
     }
 
-    parseBinanceData(data, symbols) {
+    parseBinanceData(data, symbols, coin) {
         const parsedData = {};
 
         // filter non-usdt tickers
-        const usdtTickers = data.filter(ticker => ticker.symbol.includes('USDT', 1));
+        const usdtTickers = data.filter(ticker => ticker.symbol.includes(coin, 1));
+        console.log('symbol in binace data parser este :',coin)
 
         // remove USDT from ticker symbols
         // TODO: use replace instead of substring
         for(const ticker of usdtTickers) {
-            ticker.symbol = ticker.symbol.substring(0, ticker.symbol.length - 4);
+
+            // ticker.symbol = ticker.symbol.substring(0, ticker.symbol.length - 4);
+            if(coin==='USDT')
+                ticker.symbol = ticker.symbol.substring(0, ticker.symbol.length - 4);
+            else
+                ticker.symbol = ticker.symbol.substring(0, ticker.symbol.length - 3);
         }
 
         // filter unecessary tickers
@@ -42,6 +48,33 @@ class DataParser {
 
         return parsedData;
     }
+
+    parseBTCPriceData(data, symbols) {
+        var parsedData ;
+
+        // filter non-usdt tickers
+        const usdtTickers = data.filter(ticker => ticker.symbol.includes('USDT', 1));
+
+        // remove USDT from ticker symbols
+        // TODO: use replace instead of substring
+        for(const ticker of usdtTickers) {
+            ticker.symbol = ticker.symbol.substring(0, ticker.symbol.length - 4);
+        }
+
+        // filter unecessary tickers
+        const necessaryTickers = usdtTickers.filter(ticker => symbols.includes(ticker.symbol));
+
+        for (const ticker of necessaryTickers) {
+            
+            if(ticker.symbol==='BTC')
+                parsedData=ticker.lastPrice;
+        }
+
+        parsedData= parseFloat(parsedData);
+        return parsedData;
+    }
+
+
 
     parseCoinbitData(data, symbols) {
         const parsedData = {};
@@ -84,15 +117,15 @@ class DataParser {
         return parsedData;
     }
 
-    unifyParsedData(parsedBithumbData, parsedBinanceData, parsedCoinbitData, parsedUpbitData) {
+    unifyParsedData(parsedBithumbData, parsedBinanceData, parsedCoinbitData, parsedUpbitData, priceBTC) {
         const unifiedData = [];
         for(const ticker of parsedBithumbData) {
             unifiedData.push({
                 symbol: ticker.symbol,
                 priceBithumb: (parseFloat(ticker.price) * 0.0009).toFixed(4),
                 volumeBihumb: parseInt(parseFloat(ticker.volume) * 0.0009),
-                priceBinance: parsedBinanceData[ticker.symbol] ? (parseFloat(parsedBinanceData[ticker.symbol].price)).toFixed(4) : 0,
-                volumeBinance: parsedBinanceData[ticker.symbol] ? parseInt(parsedBinanceData[ticker.symbol].volume) : 0,
+                priceBinance: parsedBinanceData[ticker.symbol] ? (parseFloat(parsedBinanceData[ticker.symbol].price)*priceBTC).toFixed(4) : 0,
+                volumeBinance: parsedBinanceData[ticker.symbol] ? (parseInt(parsedBinanceData[ticker.symbol].volume)*priceBTC) : 0,
                 priceCoinbit: parsedCoinbitData[ticker.symbol] ? (parseFloat(parsedCoinbitData[ticker.symbol].price) * 0.0009 ).toFixed(4): 0,
                 volumeCoinbit: parsedCoinbitData[ticker.symbol] ? parseInt(parseFloat(parsedCoinbitData[ticker.symbol].volume) * 0.0009) : 0,
                 priceUpbit: parsedUpbitData[ticker.symbol] ? (parsedUpbitData[ticker.symbol].price * 0.0009).toFixed(4) : 0,
@@ -102,6 +135,9 @@ class DataParser {
 
         return unifiedData;
     }
+
+
+    
 }
 
 module.exports = DataParser;
